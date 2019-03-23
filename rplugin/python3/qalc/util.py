@@ -1,22 +1,35 @@
-import time
+import re
 from functools import wraps
+from threading import Timer
+
+_ansi_re = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 
 
-def throttle(s):
-    """Decorator ensures function that can only be called once every `s` seconds.
-    """
+def ansi_escape(text):
+    return _ansi_re.sub("", text)
 
-    def decorate(fn):
-        t = None
+
+
+
+def debounce(wait):
+    """ Decorator that will postpone a functions
+        execution until after wait seconds
+        have elapsed since the last time it was invoked.
+        From https://gist.github.com/walkermatt/2871026
+        """
+    def decorator(fn):
         @wraps(fn)
-        def wrapped(*args, **kwargs):
-            nonlocal t
-            t_ = time.time()
-            if t is None or t_ - t >= s:
-                result = fn(*args, **kwargs)
-                t = time.time()
-                return result
+        def debounced(*args, **kwargs):
+            def call_it():
+                fn(*args, **kwargs)
 
-        return wrapped
+            try:
+                debounced.t.cancel()
+            except (AttributeError):
+                pass
+            debounced.t = Timer(wait, call_it)
+            debounced.t.start()
 
-    return decorate
+        return debounced
+
+    return decorator
