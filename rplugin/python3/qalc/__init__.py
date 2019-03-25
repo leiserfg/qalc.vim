@@ -17,6 +17,12 @@ class QalcPlugin:
 
     @debounce(0.2)
     def asyn_process(self, lines, buf_id):
+        for i, _ in enumerate(lines):
+            self.nvim.async_call(
+                lambda: self.nvim.call(
+                    "nvim_buf_set_virtual_text", buf_id, 0, i, [[]], {}
+                )
+            )
         for i, v in process(lines):
             self.nvim.async_call(
                 lambda: self.nvim.call(
