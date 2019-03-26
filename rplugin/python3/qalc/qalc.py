@@ -1,6 +1,5 @@
 import re
 from subprocess import PIPE, run
-
 from .util import ansi_escape
 
 _comment_re = re.compile("#.*$", re.MULTILINE)
