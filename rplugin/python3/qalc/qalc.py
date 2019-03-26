@@ -1,6 +1,6 @@
 import re
 from functools import reduce
-from subprocess import PIPE, run
+from subprocess import PIPE, run, Popen
 
 from .util import ansi_escape
 
@@ -29,6 +29,8 @@ def qalc(text):
     p = run(["qalc", "-t"], stdout=PIPE, input=text, encoding="utf-8")
     return p.stdout
 
+def qalc_exrates():
+    Popen(['qalc', '-e'])
 
 def clean_output(output):
     without_prompt = _prompt_or_empty_re.sub("", output)

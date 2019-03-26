@@ -1,12 +1,13 @@
 import pynvim
 
-from .qalc import process
+from .qalc import process, qalc_exrates
 
 
 @pynvim.plugin
 class QalcPlugin:
     def __init__(self, nvim):
         self.nvim = nvim
+        qalc_exrates()
 
     @pynvim.autocmd("BufEnter,TextChanged,TextChangedI", pattern="*.qalc")
     def on_trigger(self):
