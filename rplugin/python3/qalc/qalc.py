@@ -1,6 +1,6 @@
 import re
 from functools import reduce
-from subprocess import PIPE, run, Popen
+from subprocess import PIPE, run
 
 from .util import ansi_escape
 
@@ -9,6 +9,21 @@ _label_re = re.compile("^.*:", re.MULTILINE)
 
 _prompt_or_empty_re = re.compile("^(>.*|\s+)$", re.MULTILINE)
 _translate = [("deg", "°"), (" USD", "$"), (" EUR", "€"), (" GBP", "£"), (" JPY", "¥")]
+
+
+class Qalc:
+    def __init__(self):
+        self.first_call = True
+
+    def eval(self, text):
+        cmd = ["qalc", "-t"]
+        if self.first_call:
+            cmd = cmd + ["-e"]
+            self.first_call = False
+        p = run(cmd, stdout=PIPE, input=text, encoding="utf-8")
+        return p.stdout
+
+qalc = Qalc()
 
 
 def clean_input(input):
@@ -25,13 +40,6 @@ def clean_input(input):
     return idxs, "\n".join(new_text)
 
 
-def qalc(text):
-    p = run(["qalc", "-t"], stdout=PIPE, input=text, encoding="utf-8")
-    return p.stdout
-
-def qalc_exrates():
-    Popen(['qalc', '-e'])
-
 def clean_output(output):
     without_prompt = _prompt_or_empty_re.sub("", output)
     for line in without_prompt.splitlines():
@@ -45,5 +53,5 @@ def clean_output(output):
 
 def process(input):
     idxs, text = clean_input(input)
-    output = qalc(text)
+    output = qalc.eval(text)
     return zip(idxs, clean_output(output))
